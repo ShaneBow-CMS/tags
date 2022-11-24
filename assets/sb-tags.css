@@ -1,0 +1,31 @@
+.tagcloud i,
+#sidebar .tagcloud a {
+	border: 1px solid <P2>;
+	border-radius: 2px;
+	display: inline-block;
+	font-family: Montserrat, "Helvetica Neue", sans-serif;
+	line-height: 1;
+	margin: 0 0.1875em 0.4375em 0;
+	padding: 0.5625em 0.4375em 0.5em;
+	padding: 0.2em 0.4em;
+	color:<P2>
+	} //1486
+@media screen and (min-width:56.875em){
+	.tagcloud i,
+	#sidebar .tagcloud a {margin: 0 0.2307692308em 0.5384615385em 0;padding: 0.5384615385em 0.4615384615em 0.4615384615em}
+	}
+.tagcloud i:hover,
+.tagcloud i:focus,
+#sidebar .tagcloud a:hover,
+#sidebar .tagcloud a:focus {
+	background-color:<P2>;
+	color: #fff!important;
+	}
+.tagcloud i:hover {
+	cursor:pointer;
+	background-color:<S2>;
+	}
+.tagcloud i.on {
+	background-color:<P1>;
+	color: <S1>!important;
+	}

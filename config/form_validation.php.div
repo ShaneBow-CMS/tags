@@ -1,0 +1,4 @@
+	'tag-create'=> [
+		['field'=> 'name',   'rules'=> 'required|regex_match[/[0-9a-z_-]/]|max_length[25]'], // 'label'=> 'Job Type',
+		['field'=> 'brief',  'rules'=> 'alpha_numeric_spaces|max_length[50]']
+		],

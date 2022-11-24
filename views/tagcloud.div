@@ -1,0 +1,5 @@
+      <div class="tagcloud">
+       <?php foreach ($tags as $tag): ?>
+        <i tag="<?= $tag['id'] ?>" tip="<?=$tag['brief']?>"><?=$tag['name']?></i>
+       <?php endforeach; ?>
+      </div>

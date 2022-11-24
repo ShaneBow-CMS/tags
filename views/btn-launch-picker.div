@@ -1,0 +1,3 @@
+      <div class="clear">
+       <a href="#dlg-tags-picker" data-toggle="modal" class="btn border-slate text-slate-800 btn-flat pull-right"><i class="icon-file-plus position-left"></i> Select Tags</a>
+      </div>

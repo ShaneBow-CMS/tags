@@ -1,0 +1,42 @@
+<div class="modal fade" id="dlg-tags-picker" tabindex="-1">
+ <div class="modal-dialog">
+  <div class="modal-content">
+   <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h6 class="modal-title">Tags Picker</h6>
+   </div>
+
+   <div class="modal-body">
+    <div class="tab-content">
+     <div class="tab-pane fade in active" id="tags-select">
+      <div class="tagcloud">
+       <?php foreach ($tags as $tag): ?>
+        <i tag="<?= $tag['id'] ?>" tip="<?=$tag['brief']?>"><?=$tag['name']?></i>
+       <?php endforeach; ?>
+      </div>
+      <div class="form-group" style="overflow:hidden">
+       <a href="#tag-create" data-toggle="tab" class="btn border-slate text-slate-800 btn-flat pull-right"><i class="icon-database-upload"></i> Create</a>
+      </div>
+     </div>
+
+     <form class="tab-pane fade" id="tag-create">
+      <div class="form-group">
+       <label>Tag Name</label>
+       <input name="name" value="" class="form-control" placeholder="Display name for this tag">
+      </div>
+      <div class="form-group">
+       <label>Tag Description</label>
+       <input name="brief" value="" class="form-control" placeholder="Tooltip for this tag">
+      </div>
+      <div class="form-group" style="overflow:hidden">
+       <a href="#tags-select" data-toggle="tab" class="btn bg-teal-400 pull-right" style="margin-left:5px">Cancel</a>
+       <button type="submit" class="btn btn-primary bg-teal-400 pull-right">Submit</button>
+      </div>
+     </form>
+    </div>
+
+   </div>
+
+  </div>
+ </div>
+</div>

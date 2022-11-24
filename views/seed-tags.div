@@ -1,0 +1,17 @@
+ <div class="col-md-4">
+  <div class="panel panel-red">
+   <div class="panel-heading">Create Tags Tables</div>
+   <div class="panel-body">
+    <p>Drops then creates the following tables:</p>
+    <ul>
+     <li>tags &rarr; topic tags for objects such as blogs</li>
+     <li>tags2objs &rarr; map of tags to objects</li>
+    </ul>
+    <p>Tables are populated with the associated csv data.</p>
+   </div>
+   <form action="/tag/seed" method="post" class="panel-footer">
+    <input name="auth" class="form-control" placeholder="Auth Code">
+    <button type="submit" class="btn btn-outline btn-danger btn-xs">OK</button>
+   </form>
+  </div>
+ </div>
