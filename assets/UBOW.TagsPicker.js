@@ -1,4 +1,4 @@
-/* cms/tags/assets/UBOW.TagsPicker.20220101.js
+/* cms/tags/assets/UBOW.TagsPicker.js
 ***********************************************/
 UBOW.TagsPicker = function(el, options) {
 	var my=this;
