@@ -26,7 +26,7 @@ table.tbl-hor-min-a {width:100%;margin:0;margin-bottom:1em}
 
  <div class="col-sm-7 col-lg-8">
   <h3 id="cat-title">Pages</h3>
-  <div id="cat-pages"></div>
+  <div id="tag-pages"></div>
   <button class="btn preview btn-primary btn-outline btn-block" alt="Preview"><i class="icon-eye4"></i></button>
  </div>
 
@@ -42,22 +42,42 @@ $(() => {
 	//		};
 		constructor(tblSel, options) {
 			const canDelete = options.onDelete? true : false;
-			const editBtn = `<button title="Edit ${options.title}"><i class="icon-pencil"></i></button>`;
+			const tblBtnEdit = `<td><button title="Edit ${options.title}"><i class="icon-pencil"></i></button></td>`;
 			let ths = `<th><button title="Add ${options.title}"><i class="icon-plus3"></i></button></th>`;
 			ths += options.fields.map(f => `<th>${f[0]}</th>`).join();
 			super(tblSel, {
 				header: `<tr>${ths}</tr>`,
-				tdsHtml: (i) => (editBtn + options.fields.map(f => `<td>${i[f[0]]}</td>`).join()),
+				tdsHtml: (i) => (tblBtnEdit + options.fields.map(f => `<td>${i[f[0]]}</td>`).join()),
+				onClick: ($tr, $td, rowIndex, colIndex, item, e) => {
+					const id = item.id;
+					const debug = `CLICK row: ${rowIndex}, col: ${colIndex}, id: ${id}`;
+					UBOW.flashSuccess(debug);
+					console.log(debug, item);
+					if (my.selectedID != id) {
+						my.selectedID = id;
+						my.selectOne(id);
+						options.onSelect && options.onSelect(item);
+						}
+				/****
+					else { // edit selected
+						console.log(`e.srcElement.className: ${e.srcElement.className}`);
+						itemEd.edit(dat, (item) => {
+							itemsTbl.update(rowIndex, item);
+							return true;
+							});
+						}
+				****/
+					},
 				});
 			const my = this;
+			my.selectedID = null;
 	//		my.opts = $.extend({}, defaults, options);
 			}
 
 		populate(items) {
 			const my = this;
-//debugger;
-			this.$tbody.empty();
-			this.rows = [];
+			my.$tbody.empty();
+			my.rows = [];
 			items.forEach(item => my.append(item));
 			}
 		}
@@ -73,14 +93,13 @@ $(() => {
 		});
 
 	// Pages with selected tag
-	const pagesInTag = new UBOW.PageSummaryFetcher('#cat-pages', {
+	const pagesWithTag = new UBOW.PageSummaryFetcher('#tag-pages', {
 		per_page: 36,
 		col_class: "col-xs-6 col-sm-4 col-lg-3",
-		extra: {by:'cat', id:1},
+		extra: {by:'tag', id:11}, // 3d
 		meta: 'title',
 		container: '<div class="row same-height-row no-gutter"></div>',
 		});
-
 
 	// Fields shared by list and dialog
 	const tagFields = [
@@ -93,44 +112,18 @@ $(() => {
 	const tagsTbl = new FeditTable('table.tags-table', {
 		title: 'Tags',
 		fields: tagFields,
-		onClick: ($tr, $td, rowIndex, colIndex, dat, e) => {
-			const debug = `CLICK row: ${rowIndex}, col: ${colIndex}, id: ${dat.id}`;
-			UBOW.flashSuccess(debug);
-			console.log(debug, dat);
-			console.log(`e.srcElement.className: ${e.srcElement.className}`);
-			itemEd.edit(dat, (item) => {
-				itemsTbl.update(rowIndex, item);
-				return true;
+//		urlAdd: '/cat/post',
+//		urlUpdate: '/cat/post',
+		onSelect: (tag) => {
+			_title = tag.title;
+		//	_slug = n.slug;
+			$('#cat-title').text(tag.name);
+			pagesWithTag.reset({
+				extra: {by:'tag', id:tag.id},
 				});
 			},
 		});
 	tagsTbl.populate(<?= json_encode($tags) ?>);
-
-/*****
-//		urlAdd: '/cat/post',
-//		urlUpdate: '/cat/post',
-		format: (n) => `<i class="icon-${n.icon}"></i>
-			<i class="lft">${n.lft}</i> <b>${n.title}</b> <i class="rgt">${n.rgt}</i>`,
-		toolbar: '.tree-tools',
-		onSelect: (n) => {
-			_title = n.title;
-			_slug = n.slug;
-			$('#cat-title').text(n.title);
-			pagesInCat.reset({
-				extra: {by:'cat', id:n.id},
-				});
-			},
-		onSave: (nodes) => {
-			let data = {
-				struct: nodes.map(n => `(${n.id},${n.lft},${n.rgt},"${n.title}")`).join(',')
-				};
-			UBOW.ajax('/cat/save-struct', data, function(err,dat,msg) {
-				if (err) return UBOW.flashError(msg);
-				UBOW.flashSuccess('saved');
-				});
-			},
-		});
-***/
 
 	// Page toolbar...
 	/////////////////////
