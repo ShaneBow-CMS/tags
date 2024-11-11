@@ -1,0 +1,142 @@
+<style>
+li.on {background-color: yellow}
+li:hover {cursor:pointer}
+i.lft,i.rgt {color:red}
+
+~~tables/express/tbl-hor-min-a.css
+table.tbl-hor-min-a {width:100%;margin:0;margin-bottom:1em}
+.btns {text-align:right}
+
+.tree-tools {padding: 7px 7px 0 0}
+.tree-tools > * {margin-left: 3px}
+
+~~cms/pages/assets/page-summary.css
+.page-summary .panel-group {margin-bottom: 5px}
+.row.no-gutter {margin-right:-5px; margin-left:-5px}
+.row.no-gutter > div {padding-right:5px; padding-left:5px}
+</style>
+
+<div class="row">
+
+ <div class="col-sm-5 col-lg-4">
+  <div class="panel panel-default">
+   <table class="tags-table tbl-hor-min-a"></table>
+  </div>
+ </div>
+
+ <div class="col-sm-7 col-lg-8">
+  <h3 id="cat-title">Pages</h3>
+  <div id="cat-pages"></div>
+  <button class="btn preview btn-primary btn-outline btn-block" alt="Preview"><i class="icon-eye4"></i></button>
+ </div>
+
+</div>
+
+<script>
+$(() => {
+	class FeditTable extends UBOW.EditTable {
+	//	defaults = {
+	//		fields: [],
+	//		onDelete: null, // (item) => {} - if implemented, can delete
+	//		validate: (item) => true,
+	//		};
+		constructor(tblSel, options) {
+			const canDelete = options.onDelete? true : false;
+			const editBtn = `<button title="Edit ${options.title}"><i class="icon-pencil"></i></button>`;
+			let ths = `<th><button title="Add ${options.title}"><i class="icon-plus3"></i></button></th>`;
+			ths += options.fields.map(f => `<th>${f[0]}</th>`).join();
+			super(tblSel, {
+				header: `<tr>${ths}</tr>`,
+				tdsHtml: (i) => (editBtn + options.fields.map(f => `<td>${i[f[0]]}</td>`).join()),
+				});
+			const my = this;
+	//		my.opts = $.extend({}, defaults, options);
+			}
+
+		populate(items) {
+			const my = this;
+//debugger;
+			this.$tbody.empty();
+			this.rows = [];
+			items.forEach(item => my.append(item));
+			}
+		}
+
+	// preview button
+	let _title = '';
+	let _slug = '';
+	$('button.preview').on('click', function(e){
+		e.preventDefault();
+		if (!_slug) return UBOW.flashError('Slug is blank!');
+		var myWindow = window.open('/page/category/'+slug, title,
+			"toolbar=no,scrollbars=yes,resizable=yes,top=100,left=100,width=400,height=500");
+		});
+
+	// Pages with selected tag
+	const pagesInTag = new UBOW.PageSummaryFetcher('#cat-pages', {
+		per_page: 36,
+		col_class: "col-xs-6 col-sm-4 col-lg-3",
+		extra: {by:'cat', id:1},
+		meta: 'title',
+		container: '<div class="row same-height-row no-gutter"></div>',
+		});
+
+
+	// Fields shared by list and dialog
+	const tagFields = [
+		['id'],
+		['name'],
+		['brief'], //tip
+		];
+
+	// Tags List
+	const tagsTbl = new FeditTable('table.tags-table', {
+		title: 'Tags',
+		fields: tagFields,
+		onClick: ($tr, $td, rowIndex, colIndex, dat, e) => {
+			const debug = `CLICK row: ${rowIndex}, col: ${colIndex}, id: ${dat.id}`;
+			UBOW.flashSuccess(debug);
+			console.log(debug, dat);
+			console.log(`e.srcElement.className: ${e.srcElement.className}`);
+			itemEd.edit(dat, (item) => {
+				itemsTbl.update(rowIndex, item);
+				return true;
+				});
+			},
+		});
+	tagsTbl.populate(<?= json_encode($tags) ?>);
+
+/*****
+//		urlAdd: '/cat/post',
+//		urlUpdate: '/cat/post',
+		format: (n) => `<i class="icon-${n.icon}"></i>
+			<i class="lft">${n.lft}</i> <b>${n.title}</b> <i class="rgt">${n.rgt}</i>`,
+		toolbar: '.tree-tools',
+		onSelect: (n) => {
+			_title = n.title;
+			_slug = n.slug;
+			$('#cat-title').text(n.title);
+			pagesInCat.reset({
+				extra: {by:'cat', id:n.id},
+				});
+			},
+		onSave: (nodes) => {
+			let data = {
+				struct: nodes.map(n => `(${n.id},${n.lft},${n.rgt},"${n.title}")`).join(',')
+				};
+			UBOW.ajax('/cat/save-struct', data, function(err,dat,msg) {
+				if (err) return UBOW.flashError(msg);
+				UBOW.flashSuccess('saved');
+				});
+			},
+		});
+***/
+
+	// Page toolbar...
+	/////////////////////
+	new UBOW.DBTableBackupRestore('#page-toolbar', {
+		tbl: 'tags',
+		});
+
+	});
+</script>

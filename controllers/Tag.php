@@ -16,6 +16,16 @@ class Tag extends MY_Controller {
 		}
 
 	/**
+	* manage - admin page for managing tags
+	*/
+	public function manage() {
+		$this->require_min_level(MIN_ADMIN_LEVEL);
+		$this->load->model('mtags');
+		$data['tags'] = $this->mtags->all_tags();
+		$this->load->view('admin/cms-tags-manager', $data);
+		}
+
+	/**
 	* create - processes AJAX request to add a new tag
 	*/
 	public function create() {
