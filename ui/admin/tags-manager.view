@@ -58,20 +58,24 @@ $(() => {
 						my.selectOne(id);
 						options.onSelect && options.onSelect(item);
 						}
-				/****
 					else { // edit selected
 						console.log(`e.srcElement.className: ${e.srcElement.className}`);
-						itemEd.edit(dat, (item) => {
-							itemsTbl.update(rowIndex, item);
+						my.$dlgItem.setTitle(`Edit ${options.title}`);
+						my.$dlgItem.edit(item, (updatedItem) => {
+							my.update(rowIndex, updatedItem);
+console.log('back from edit', updatedItem);
 							return true;
 							});
 						}
-				****/
 					},
 				});
 			const my = this;
 			my.selectedID = null;
 	//		my.opts = $.extend({}, defaults, options);
+			my.$dlgItem = new UBOW.DlgForm({
+				fields: options.fields,
+				});
+
 			}
 
 		populate(items) {
@@ -103,9 +107,9 @@ $(() => {
 
 	// Fields shared by list and dialog
 	const tagFields = [
-		['id'],
-		['name'],
-		['brief'], //tip
+		['id', 'input'],
+		['name', 'input'],
+		['brief', 'input'], //tip
 		];
 
 	// Tags List
