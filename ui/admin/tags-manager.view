@@ -34,81 +34,6 @@ table.tbl-hor-min-a {width:100%;margin:0;margin-bottom:1em}
 
 <script>
 $(() => {
-	class FeditTable extends UBOW.EditTable {
-
-		constructor(tblSel, options) {
-			const defaults = {
-			//	fields: [],
-				validate: (item) => true,
-				};
-			const tblBtnEdit = `<td><button title="Edit ${options.title}"><i class="icon-pencil"></i></button></td>`;
-			let ths = `<th><button title="Add ${options.title}" class="add"><i class="icon-plus3"></i></button></th>`;
-			ths += options.fields.map(f => `<th>${f[0]}</th>`).join();
-			super(tblSel, {
-				header: `<tr>${ths}</tr>`,
-				tdsHtml: (i) => (tblBtnEdit + options.fields.map(f => `<td>${i[f[0]]}</td>`).join()),
-				onClick: ($tr, $td, rowIndex, colIndex, item, e) => {
-					const id = item.id;
-					console.log(`CLICK row: ${rowIndex}, col: ${colIndex}, id: ${id}`, item);
-					if (my.selectedID != id) {
-						my.selectedID = id;
-						my.selectOne(id);
-						options.onSelect && options.onSelect(item);
-						}
-					else { // edit selected
-						console.log(`e.srcElement.className: ${e.srcElement.className}`);
-						my.onEdit(item, rowIndex);
-						}
-					},
-				});
-			const my = this;
-			my.selectedID = null;
-			my.opts = {...my.opts, ...defaults, ...options};
-			my.$dlgItem = new UBOW.DlgForm({
-				fields: options.fields,
-				});
-
-			// Add item handler
-			my.$tbl.on('click', 'button.add', function(e) {
-				my.onAdd();
-				});
-			}
-
-		populate(items) {
-			const my = this;
-			my.$tbody.empty();
-			my.rows = [];
-			items.forEach(item => my.append(item));
-			}
-
-		onAdd() {
-			const my = this;
-			my.$dlgItem.setTitle(`Add ${my.opts.title}`);
-			my.$dlgItem.form.hide('id', true);
-			my.$dlgItem.add(item => {
-				item.id = '0';
-				my.opts.validate(item) && UBOW.ajax(my.opts.urlAdd, item, (e, dat, m) => {
-					if (e) UBOW.flashError(`Add Failed: ${m}`);
-					my.append(dat);
-					my.$dlgItem.hide();
-					});
-				});
-			}
-
-		onEdit(item, rowIndex) {
-			const my = this;
-			my.$dlgItem.setTitle(`Edit ${my.opts.title}`);
-			my.$dlgItem.form.hide('id', false);
-			my.$dlgItem.edit(item, (updatedItem) => {
-				my.opts.validate(item) && UBOW.ajax(my.opts.urlUpdate, updatedItem, (e, d, m) => {
-					if (e) UBOW.flashError(`Update Node Failed: ${m}`);
-					my.update(rowIndex, updatedItem);
-					my.$dlgItem.hide();
-					});
-				});
-			}
-		}
-
 	// preview button
 	let _title = false;
 	$('button.preview').on('click', function(e){
@@ -135,7 +60,7 @@ $(() => {
 		];
 
 	// Tags List
-	const tagsTbl = new FeditTable('table.tags-table', {
+	const tagsTbl = new UBOW.FeditTable('table.tags-table', {
 		title: 'Tag',
 		fields: tagFields,
 		urlAdd: '/tag/create',
