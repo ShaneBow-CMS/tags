@@ -25,7 +25,7 @@ table.tbl-hor-min-a {width:100%;margin:0;margin-bottom:1em}
  </div>
 
  <div class="col-sm-7 col-lg-8">
-  <h3 id="cat-title">Pages</h3>
+  <h3 id="tag-title">Pages</h3>
   <div id="tag-pages"></div>
   <button class="btn preview btn-primary btn-outline btn-block" alt="Preview"><i class="icon-eye4"></i></button>
  </div>
@@ -35,24 +35,23 @@ table.tbl-hor-min-a {width:100%;margin:0;margin-bottom:1em}
 <script>
 $(() => {
 	class FeditTable extends UBOW.EditTable {
-	//	defaults = {
-	//		fields: [],
-	//		onDelete: null, // (item) => {} - if implemented, can delete
-	//		validate: (item) => true,
-	//		};
+
 		constructor(tblSel, options) {
+			const defaults = {
+			//	fields: [],
+			//	onDelete: null, // (item) => {} - if implemented, can delete
+				validate: (item) => true,
+				};
 			const canDelete = options.onDelete? true : false;
 			const tblBtnEdit = `<td><button title="Edit ${options.title}"><i class="icon-pencil"></i></button></td>`;
-			let ths = `<th><button title="Add ${options.title}"><i class="icon-plus3"></i></button></th>`;
+			let ths = `<th><button title="Add ${options.title}" class="add"><i class="icon-plus3"></i></button></th>`;
 			ths += options.fields.map(f => `<th>${f[0]}</th>`).join();
 			super(tblSel, {
 				header: `<tr>${ths}</tr>`,
 				tdsHtml: (i) => (tblBtnEdit + options.fields.map(f => `<td>${i[f[0]]}</td>`).join()),
 				onClick: ($tr, $td, rowIndex, colIndex, item, e) => {
 					const id = item.id;
-					const debug = `CLICK row: ${rowIndex}, col: ${colIndex}, id: ${id}`;
-					UBOW.flashSuccess(debug);
-					console.log(debug, item);
+					console.log(`CLICK row: ${rowIndex}, col: ${colIndex}, id: ${id}`, item);
 					if (my.selectedID != id) {
 						my.selectedID = id;
 						my.selectOne(id);
@@ -60,20 +59,20 @@ $(() => {
 						}
 					else { // edit selected
 						console.log(`e.srcElement.className: ${e.srcElement.className}`);
-						my.$dlgItem.setTitle(`Edit ${options.title}`);
-						my.$dlgItem.edit(item, (updatedItem) => {
-							my.update(rowIndex, updatedItem);
-console.log('back from edit', updatedItem);
-							return true;
-							});
+						my.onEdit(item, rowIndex);
 						}
 					},
 				});
 			const my = this;
 			my.selectedID = null;
-	//		my.opts = $.extend({}, defaults, options);
+			my.opts = {...my.opts, ...defaults, ...options};
 			my.$dlgItem = new UBOW.DlgForm({
 				fields: options.fields,
+				});
+
+			// Add item handler
+			my.$tbl.on('click', 'button.add', function(e) {
+				my.onAdd();
 				});
 
 			}
@@ -83,6 +82,34 @@ console.log('back from edit', updatedItem);
 			my.$tbody.empty();
 			my.rows = [];
 			items.forEach(item => my.append(item));
+			}
+
+		onAdd() {
+			const my = this;
+			my.$dlgItem.setTitle(`Add ${my.opts.title}`);
+			my.$dlgItem.form.hide('id', true);
+			my.$dlgItem.add(item => {
+				item.id = '0';
+				my.opts.validate(item) && UBOW.ajax(my.opts.urlAdd, item, (e, dat, m) => {
+					if (e) UBOW.flashError(`Add Failed: ${m}`);
+					my.append(dat);
+					my.$dlgItem.hide();
+					});
+				});
+			}
+
+		onEdit(item, rowIndex) {
+			const my = this;
+			my.$dlgItem.setTitle(`Edit ${my.opts.title}`);
+			my.$dlgItem.form.hide('id', false);
+			my.$dlgItem.edit(item, (updatedItem) => {
+				console.log('onEdit back from edit', updatedItem);
+				my.opts.validate(item) && UBOW.ajax(my.opts.urlUpdate, updatedItem, (e, d, m) => {
+					if (e) UBOW.flashError(`Update Node Failed: ${m}`);
+					my.update(rowIndex, updatedItem);
+					my.$dlgItem.hide();
+					});
+				});
 			}
 		}
 
@@ -114,14 +141,14 @@ console.log('back from edit', updatedItem);
 
 	// Tags List
 	const tagsTbl = new FeditTable('table.tags-table', {
-		title: 'Tags',
+		title: 'Tag',
 		fields: tagFields,
-//		urlAdd: '/cat/post',
-//		urlUpdate: '/cat/post',
+		urlAdd: '/tag/create',
+		urlUpdate: '/tag/post',
 		onSelect: (tag) => {
 			_title = tag.title;
 		//	_slug = n.slug;
-			$('#cat-title').text(tag.name);
+			$('#tag-title').text(tag.name);
 			pagesWithTag.reset({
 				extra: {by:'tag', id:tag.id},
 				});
