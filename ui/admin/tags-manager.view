@@ -39,10 +39,8 @@ $(() => {
 		constructor(tblSel, options) {
 			const defaults = {
 			//	fields: [],
-			//	onDelete: null, // (item) => {} - if implemented, can delete
 				validate: (item) => true,
 				};
-			const canDelete = options.onDelete? true : false;
 			const tblBtnEdit = `<td><button title="Edit ${options.title}"><i class="icon-pencil"></i></button></td>`;
 			let ths = `<th><button title="Add ${options.title}" class="add"><i class="icon-plus3"></i></button></th>`;
 			ths += options.fields.map(f => `<th>${f[0]}</th>`).join();
@@ -74,7 +72,6 @@ $(() => {
 			my.$tbl.on('click', 'button.add', function(e) {
 				my.onAdd();
 				});
-
 			}
 
 		populate(items) {
@@ -103,7 +100,6 @@ $(() => {
 			my.$dlgItem.setTitle(`Edit ${my.opts.title}`);
 			my.$dlgItem.form.hide('id', false);
 			my.$dlgItem.edit(item, (updatedItem) => {
-				console.log('onEdit back from edit', updatedItem);
 				my.opts.validate(item) && UBOW.ajax(my.opts.urlUpdate, updatedItem, (e, d, m) => {
 					if (e) UBOW.flashError(`Update Node Failed: ${m}`);
 					my.update(rowIndex, updatedItem);
@@ -114,12 +110,11 @@ $(() => {
 		}
 
 	// preview button
-	let _title = '';
-	let _slug = '';
+	let _title = false;
 	$('button.preview').on('click', function(e){
 		e.preventDefault();
-		if (!_slug) return UBOW.flashError('Slug is blank!');
-		var myWindow = window.open('/page/category/'+slug, title,
+		if (!_title) return UBOW.flashError('Select a tag!');
+		var myWindow = window.open(`/page/tagged/_${_title}`, _title,
 			"toolbar=no,scrollbars=yes,resizable=yes,top=100,left=100,width=400,height=500");
 		});
 
@@ -146,8 +141,7 @@ $(() => {
 		urlAdd: '/tag/create',
 		urlUpdate: '/tag/post',
 		onSelect: (tag) => {
-			_title = tag.title;
-		//	_slug = n.slug;
+			_title = tag.name;
 			$('#tag-title').text(tag.name);
 			pagesWithTag.reset({
 				extra: {by:'tag', id:tag.id},
