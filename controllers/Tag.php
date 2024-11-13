@@ -29,6 +29,14 @@ class Tag extends MY_Controller {
 	* create - processes AJAX request to add a new tag
 	*/
 	public function create() {
+		return $this->post();
+		}
+
+	/**
+	* post - processes AJAX request to
+	* add a new tag or update existing tag
+	*/
+	public function post() {
 		$this->load->helper('ajax');
 		$usr = $this->session->userdata('usr');
 		if (!$this->_usr)
@@ -39,11 +47,15 @@ class Tag extends MY_Controller {
 
 		$this->load->model('mtags');
 
+		$id = isset($_POST['id'])? intval($_POST['id']) : FALSE;
 		$tag['name'] = $_POST['name'];
 		$tag['brief'] = $_POST['brief'];
 
 		try {
-			$data = $this->mtags->create($tag);
+			if ($id)
+				$data = $this->mtags->update($id, $tag);
+			else
+				$data = $this->mtags->create($tag);
 			$this->_write_tagcloud();
 			}
 		catch (Exception $e) {db_error($e->getMessage());}
