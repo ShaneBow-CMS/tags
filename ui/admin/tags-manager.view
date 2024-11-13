@@ -66,6 +66,7 @@ $(() => {
 		urlAdd: '/tag/create',
 		urlUpdate: '/tag/post',
 		onSelect: (tag) => {
+			if (!tag) return UBOW.flashSuccess('Select a tag');
 			_title = tag.name;
 			$('#tag-title').text(tag.name);
 			pagesWithTag.reset({
@@ -79,6 +80,12 @@ $(() => {
 	/////////////////////
 	new UBOW.DBTableBackupRestore('#page-toolbar', {
 		tbl: 'tags',
+		onRestore: () => {
+			UBOW.ajax('/tag/fetch', {}, (err, tags, msg) => {
+				if (err) UBOW.flashError(msg);
+				tagsTbl.populate(tags);
+				});
+			},
 		});
 
 	});

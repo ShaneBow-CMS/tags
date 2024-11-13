@@ -62,6 +62,23 @@ class Tag extends MY_Controller {
 		respond(0, "SUCCESS", $data);
 		}
 
+	/**
+	* fetch - processes AJAX request to
+	* retrieve all tags
+	*/
+	public function fetch() {
+		$this->load->helper('ajax');
+		$usr = $this->session->userdata('usr');
+
+		$this->load->model('mtags');
+
+		try {
+			$tags = $this->mtags->all_tags();
+			}
+		catch (Exception $e) {db_error($e->getMessage());}
+		respond(0, "SUCCESS", $tags);
+		}
+
 	public function seed() {
 		$this->require_role(ROLE_ADMIN);
 		$this->load->model('mseeder');
