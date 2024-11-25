@@ -84,6 +84,8 @@ class Mtags extends MY_Model {
 
 	public function paginated_pages($base_url, $first, $per_page = 10, $num_links = 5, $where='', $order_by = 'debut DESC') {
 		$this->table_name = 'tags2objs t2o';
+		// need this join for init pagination
+		$this->db->join('pages p', 't2o.oid = p.id AND t2o.otype='.OTYPE_PAGE);
 		$paging = $this->init_pagination($base_url, $first, $where, $per_page, $num_links);
 
 		if ($where) $this->db->where($where);
