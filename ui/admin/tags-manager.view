@@ -5,15 +5,13 @@ i.lft,i.rgt {color:red}
 
 ~~tables/express/tbl-hor-min-a.css
 table.tbl-hor-min-a {width:100%;margin:0;margin-bottom:1em}
+table.tbl-hor-min-a tr.selected {background:#337ab7; color:#fff}
 .btns {text-align:right}
 
 .tree-tools {padding: 7px 7px 0 0}
 .tree-tools > * {margin-left: 3px}
 
-~~cms/pages/assets/page-summary.css
-.page-summary .panel-group {margin-bottom: 5px}
-.row.no-gutter {margin-right:-5px; margin-left:-5px}
-.row.no-gutter > div {padding-right:5px; padding-left:5px}
+~~cms/pages/assets/admin-page-summary.css
 </style>
 
 <div class="row">
@@ -44,13 +42,7 @@ $(() => {
 		});
 
 	// Pages with selected tag
-	const pagesWithTag = new UBOW.PageSummaryFetcher('#tag-pages', {
-		per_page: 36,
-		col_class: "col-xs-6 col-sm-4 col-lg-3",
-		extra: {by:'tag', id:11}, // 3d
-		meta: 'title',
-		container: '<div class="row same-height-row no-gutter"></div>',
-		});
+	const pagesWithTag = new UBOW.AdminPageSummaryFetcher('#tag-pages', 'tag');
 
 	// Fields shared by list and dialog
 	const tagFields = [
@@ -69,9 +61,7 @@ $(() => {
 			if (!tag) return UBOW.flashSuccess('Select a tag');
 			_title = tag.name;
 			$('#tag-title').text(tag.name);
-			pagesWithTag.reset({
-				extra: {by:'tag', id:tag.id},
-				});
+			pagesWithTag.getId(tag.id);
 			},
 		});
 	tagsTbl.populate(<?= json_encode($tags) ?>);
