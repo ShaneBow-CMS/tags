@@ -1,29 +1,24 @@
 <style>
-li.on {background-color: yellow}
-li:hover {cursor:pointer}
-i.lft,i.rgt {color:red}
-
-~~tables/express/tbl-hor-min-a.css
-table.tbl-hor-min-a {width:100%;margin:0;margin-bottom:1em}
-table.tbl-hor-min-a tr.selected {background:#337ab7; color:#fff}
-.btns {text-align:right}
-
-.tree-tools {padding: 7px 7px 0 0}
-.tree-tools > * {margin-left: 3px}
-
 ~~cms/pages/assets/admin-page-summary.css
+
+.tagcloud i {border-color:#337ab7}
+.tagcloud i.on {
+	background: #337ab7;
+	color: #fff!important;
+	}
 </style>
 
 <div class="row">
 
  <div class="col-sm-5 col-lg-4">
-  <div class="panel panel-default">
-   <table class="tags-table tbl-hor-min-a"></table>
-  </div>
+      <div class="tagcloud">
+       <?php foreach ($tags as $tag): ?>
+        <i tag="<?= $tag['id'] ?>" tip="<?=$tag['brief']?>"><?=$tag['name']?></i>
+       <?php endforeach; ?>
+      </div>
  </div>
 
  <div class="col-sm-7 col-lg-8">
-  <h3 id="tag-title">Pages</h3>
   <div id="tag-pages"></div>
   <button class="btn preview btn-primary btn-outline btn-block" alt="Preview"><i class="icon-eye4"></i></button>
  </div>
@@ -43,28 +38,41 @@ $(() => {
 
 	// Pages with selected tag
 	const pagesWithTag = new UBOW.AdminPageSummaryFetcher('#tag-pages', 'tag');
+	const markupTag = (tag) => `<i tag="${tag.id}" tip="${tag.brief}">${tag.name}</i>`;
 
-	// Fields shared by list and dialog
-	const tagFields = [
-		['id', 'input'],
-		['name', 'input'],
-		['brief', 'input'], //tip
-		];
-
-	// Tags List
-	const tagsTbl = new UBOW.FeditTable('table.tags-table', {
-		title: 'Tag',
-		fields: tagFields,
-		urlAdd: '/tag/create',
-		urlUpdate: '/tag/post',
-		onSelect: (tag) => {
-			if (!tag) return UBOW.flashSuccess('Select a tag');
-			_title = tag.name;
-			$('#tag-title').text(tag.name);
-			pagesWithTag.getId(tag.id);
-			},
+	const $editor = new UBOW.DlgForm({
+		fields: [ // id passed into edit
+			['name', 'input'],
+			['brief', 'input'], //tip
+			],
+		blankObj: {id:0},
 		});
-	tagsTbl.populate(<?= json_encode($tags) ?>);
+
+	$('.tagcloud').on('click', 'i[tag]', function() {
+			const $tag = $(this);
+			let tag = {
+				id: $tag.attr('tag'),
+				brief: $tag.attr('tip'),
+				name: $tag.text()
+				};
+			if ($tag.hasClass('on')) { // click twice to edit
+				$editor.setTitle(`Edit ${tag.name} (${tag.id})`);
+				$editor.edit(tag, (updatedTag) => {
+					UBOW.ajax('/tag/post', updatedTag, (e, d, m) => {
+						if (e) UBOW.flashError(`Update Tag Failed: ${m}`);
+						$tag.html(updatedTag.name);
+						$tag.attr('tip', updatedTag.brief);
+						$editor.hide();
+						});
+					});
+				}
+			else { // first click selects tag
+				$('.tagcloud .on').removeClass('on');
+				$tag.addClass('on');
+				_title = tag.name;
+				pagesWithTag.getId(tag.id);
+				}
+			});
 
 	// Page toolbar...
 	/////////////////////
@@ -76,6 +84,18 @@ $(() => {
 				tagsTbl.populate(tags);
 				});
 			},
+		});
+
+	SBA.makeToolBtn('plus3', 'add tag', function() {
+		$editor.setTitle(`Add Tag`);
+		$editor.add((newTag) => {
+			UBOW.ajax('/tag/create', newTag, (e, d, m) => {
+				if (e) UBOW.flashError(`Add Tag Failed: ${m}`);
+				newTag.id = d.id;
+				$('.tagcloud').append(markupTag(newTag));
+				$editor.hide();
+				});
+			});
 		});
 
 	});
