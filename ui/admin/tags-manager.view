@@ -1,6 +1,7 @@
 <style>
 ~~cms/pages/assets/admin-page-summary.css
 
+.tagcloud {text-align: center}
 .tagcloud i {border-color:#337ab7}
 .tagcloud i.on {
 	background: #337ab7;
@@ -12,6 +13,7 @@
 
  <div class="col-sm-5 col-lg-4">
       <div class="tagcloud">
+       <i tag="0" tip="" class="on">untagged pages</i><br>
        <?php foreach ($tags as $tag): ?>
         <i tag="<?= $tag['id'] ?>" tip="<?=$tag['brief']?>"><?=$tag['name']?></i>
        <?php endforeach; ?>
@@ -37,7 +39,7 @@ $(() => {
 		});
 
 	// Pages with selected tag
-	const pagesWithTag = new UBOW.AdminPageSummaryFetcher('#tag-pages', 'tag');
+	const pagesWithTag = new UBOW.AdminPageSummaryFetcher('#tag-pages', 'tag', 0);
 	const markupTag = (tag) => `<i tag="${tag.id}" tip="${tag.brief}">${tag.name}</i>`;
 
 	const $editor = new UBOW.DlgForm({
@@ -56,6 +58,7 @@ $(() => {
 				name: $tag.text()
 				};
 			if ($tag.hasClass('on')) { // click twice to edit
+				if (tag.id=='0') return; // button for untagged pages
 				$editor.setTitle(`Edit ${tag.name} (${tag.id})`);
 				$editor.edit(tag, (updatedTag) => {
 					UBOW.ajax('/tag/post', updatedTag, (e, d, m) => {
